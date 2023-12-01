@@ -1,3 +1,4 @@
+import * as fs from "fs";
 
 export const day01 = (input: string): number => {
     var result = 0;
@@ -8,3 +9,6 @@ export const day01 = (input: string): number => {
     }
     return result
 }
+
+const input = fs.readFileSync("day01_input", "utf8");
+console.log(day01(input));
