@@ -1,6 +1,14 @@
+export class Coordinates {
+    constructor(public x: number, public y: number) {}
+    
+    toString() {
+        return reflectiveToString(this);
+    }
+}
+
 export class NumberRepresentation {
   constructor(
-    public coordinates: [number, number],
+    public coordinates: Coordinates,
     public representation: string,
   ) {}
 
@@ -38,15 +46,15 @@ export const surrounding_fields = (
   // return all characters that are in the surrounding fields of the number
   // concatenate to one string
   var result = "";
-  const x_min = max(0, number.coordinates[0] - 1);
+  const x_min = max(0, number.coordinates.x - 1);
   const x_max = min(
     input_lines[0].length - 1,
-    number.coordinates[0] + number.representation.length,
+    number.coordinates.x + number.representation.length,
   );
-  const y_min = max(0, number.coordinates[1] - 1);
+  const y_min = max(0, number.coordinates.y - 1);
   const y_max = min(
     input_lines.length - 1,
-    number.coordinates[1] + 1
+    number.coordinates.y + 1
   );
   for (var i_y = y_min; i_y <= y_max; i_y++) {
     result += input_lines[i_y].slice(x_min, x_max + 1);
@@ -61,28 +69,52 @@ export const find_numbers = (
   // return a list of NumberRepresentations
   var result: NumberRepresentation[] = [];
   input_string.forEach((line, i_y, _all_lines) => {
-    var current_number = new NumberRepresentation([0, 0], "");
+    var current_number = new NumberRepresentation(new Coordinates(0, 0), "");
     line.split("").forEach((c, i_x, _all) => {
       if (c in "0123456789".split("")) {
         if (current_number.representation.length == 0) {
-          current_number.coordinates = [i_x, i_y];
+          current_number.coordinates = new Coordinates(i_x, i_y);
         }
         current_number.representation += c;
       } else {
         if (current_number.representation.length > 0) {
           result.push(current_number);
-          current_number = new NumberRepresentation([0, 0], "");
+          current_number = new NumberRepresentation(new Coordinates(0, 0), "");
         }
       }
     });
     // at end of line, push number
     if (current_number.representation.length > 0) {
       result.push(current_number);
-      current_number = new NumberRepresentation([0, 0], "");
+      current_number = new NumberRepresentation(new Coordinates(0, 0), "");
     }
   });
   return result;
 };
+
+export const find_stars = (input: string[]): Coordinates[] => {
+    var result: Coordinates[] = [];
+    input.forEach((line, i_y, _all_lines) => {
+        line.split("").forEach((c, i_x, _all) => {
+        if (c == "*") {
+            result.push(new Coordinates(i_x, i_y));
+        }
+        });
+    });
+    return result;
+}
+
+export const adjacent_numbers = (coordinates: Coordinates, numbers: NumberRepresentation[]): NumberRepresentation[] => {
+    return numbers
+        .filter((number) => {
+            return (
+                coordinates.x >= number.coordinates.x  - 1 &&
+                coordinates.x <= number.coordinates.x + number.representation.length &&
+                coordinates.y >= number.coordinates.y - 1 &&
+                coordinates.y <= number.coordinates.y + 1
+            )
+        })
+}
 
 export const next_to_symbol = (
   input_string: string[],
@@ -117,14 +149,28 @@ export const day03_part1 = (input: string): number => {
     .reduce((a, b) => a + b, 0);
 };
 
+export const day03_part2 = (input: string): number => {
+    const lines = input.trim().split("\n").map((line) => line.trim());
+    const stars = find_stars(lines)
+    const numbers = find_numbers(lines)
+    var result = 0;
+    stars.forEach((star, i, _all_stars) => {
+        const adj_numbers = adjacent_numbers(star, numbers)
+        if (adj_numbers.length == 2) {
+            result += numerical(lines, adj_numbers[0]) * numerical(lines, adj_numbers[1])
+        }
+    });
+    return result
+}
+
 export const numerical = (
   input: string[],
   number: NumberRepresentation,
 ): number => {
   return parseInt(
-    input[number.coordinates[1]].slice(
-      number.coordinates[0],
-      number.coordinates[0] + number.representation.length,
+    input[number.coordinates.y].slice(
+      number.coordinates.x,
+      number.coordinates.x + number.representation.length,
     ),
   );
 };
