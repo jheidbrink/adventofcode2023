@@ -1,4 +1,4 @@
-import { day04_part1, intersection } from "./day04";
+import { Numbers, day04_part1, day04_part2, intersection } from "./day04";
 
 const example_input = [
     "Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53",
@@ -15,8 +15,14 @@ describe("day04_part1", () => {
     });
 });
 
+describe("day04_part2", () => {
+    it("should solve part 2", () => {
+        expect(day04_part2(example_input)).toBe(30);
+    });
+});
+
 describe("intersection", () => {
     it("should find the intersection of two sets", () => {
-        expect(intersection(new Set([1, 2, 3]), new Set([2, 3, 4]))).toStrictEqual(new Set([2, 3]));
+        expect(intersection(new Numbers([1, 2, 3]), new Numbers([2, 3, 4]))).toStrictEqual(new Numbers([2, 3]));
     });
 });
